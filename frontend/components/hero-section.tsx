@@ -15,7 +15,7 @@ export function HeroSection() {
     if (!url) return
     setIsLoading(true)
     try {
-      const response = await fetch('http://localhost:3000/shorten', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/shorten`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

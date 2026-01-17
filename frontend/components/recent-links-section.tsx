@@ -27,7 +27,7 @@ export function RecentLinksSection() {
         return;
       }
 
-      const res = await fetch('http://localhost:3000/links/info', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/links/info`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -63,7 +63,7 @@ export function RecentLinksSection() {
 
   const handleDelete = async (id: number) => {
     try {
-      await fetch(`http://localhost:3000/delete/${id}`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/delete/${id}`, {
         method: 'DELETE',
       });
       fetchLinks();
