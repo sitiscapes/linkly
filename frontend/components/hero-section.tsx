@@ -14,10 +14,35 @@ export function HeroSection() {
   const handleShorten = async () => {
     if (!url) return
     setIsLoading(true)
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 800))
-    setShortUrl(`linkly.co/${Math.random().toString(36).substring(2, 8)}`)
-    setIsLoading(false)
+    try {
+      const response = await fetch('http://localhost:3000/shorten', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to shorten link');
+      }
+
+      const data = await response.json();
+      setShortUrl(data.shortUrl);
+
+      // Save to localStorage
+      const savedCodes = JSON.parse(localStorage.getItem('recentLinks') || '[]');
+      if (!savedCodes.includes(data.code)) {
+        const newCodes = [data.code, ...savedCodes].slice(0, 10); // Keep last 10
+        localStorage.setItem('recentLinks', JSON.stringify(newCodes));
+
+        window.dispatchEvent(new Event('storage'));
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleCopy = () => {
@@ -89,7 +114,7 @@ export function HeroSection() {
                   variant="outline"
                   size="sm"
                   onClick={handleCopy}
-                  className="gap-2 rounded-lg border-border text-foreground hover:bg-secondary bg-transparent"
+                  className="gap-2 rounded-lg border-border text-foreground hover:text-accent hover:bg-secondary bg-transparent"
                 >
                   {copied ? (
                     <>
