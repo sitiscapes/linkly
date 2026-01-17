@@ -33,7 +33,7 @@ export function HeroSection() {
       // Save to localStorage
       const savedCodes = JSON.parse(localStorage.getItem('recentLinks') || '[]');
       if (!savedCodes.includes(data.code)) {
-        const newCodes = [data.code, ...savedCodes].slice(0, 10); // Keep last 10
+        const newCodes = [data.code, ...savedCodes].slice(0, 10);
         localStorage.setItem('recentLinks', JSON.stringify(newCodes));
 
         window.dispatchEvent(new Event('storage'));
