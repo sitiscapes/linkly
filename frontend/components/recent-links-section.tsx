@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Copy, Check, ExternalLink, MoreHorizontal, Trash2 } from "lucide-react"
+import { Copy, Check, ExternalLink, MoreHorizontal, Trash2, Link2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import Link from "next/link"
@@ -83,13 +83,29 @@ export function RecentLinksSection() {
       <div className="mx-auto max-w-4xl">
         <div className="mb-8 flex items-center justify-between">
           <h2 className="text-2xl font-bold text-foreground">Recent Links</h2>
-          <Button
-            variant="outline"
-            className="rounded-lg border-border text-muted-foreground hover:text-accent-foreground bg-transparent"
-          >
-            View all
-          </Button>
         </div>
+
+        {links.length === 0 ? (
+          <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border bg-card/50 py-16 px-4 text-center">
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+              <Link2 className="h-8 w-8 text-primary" />
+            </div>
+            <h3 className="mb-2 text-lg font-semibold text-foreground">No links yet</h3>
+            <p className="mb-6 max-w-sm text-sm text-muted-foreground">
+              Start shortening your URLs above and they will appear here for easy access and tracking.
+            </p>
+            <Button
+              variant="outline"
+              className="rounded-lg border-primary/30 text-primary hover:text-accent hover:bg-primary/10 bg-transparent"
+              onClick={() => {
+                const input = document.querySelector('input[type="url"]') as HTMLInputElement
+                input?.focus()
+              }}
+            >
+              Shorten your first link
+            </Button>
+          </div>
+        ) : (
 
         <div className="space-y-4">
           {links.map((link) => (
@@ -157,6 +173,7 @@ export function RecentLinksSection() {
             </div>
           ))}
         </div>
+        )}
       </div>
     </section>
   )
