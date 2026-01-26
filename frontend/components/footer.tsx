@@ -1,5 +1,6 @@
 import { Link2, Github, Twitter } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 
 export function Footer() {
   return (
@@ -8,7 +9,7 @@ export function Footer() {
         <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <Link2 className="h-4 w-4 text-primary-foreground" />
+              <Image src="/favicon.ico" alt="icon" width={24} height={24} />
             </div>
             <span className="font-semibold text-foreground">Linkly</span>
           </div>
