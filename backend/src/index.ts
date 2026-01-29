@@ -21,14 +21,26 @@ const generateCode = (length: number = 6): string => {
 // POST /shorten
 app.post('/shorten', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { url } = req.body;
+    const { url, createdAt } = req.body;
     if (!url) {
       res.status(400).json({ error: 'URL is required' });
       return;
     }
 
     const code = generateCode();
-    await pool.query('INSERT INTO links (code, original_url) VALUES (?, ?)', [code, url]);
+
+    // If createdAt is not provided, generate a default Malaysia time
+    const defaultTime = new Date().toLocaleString('en-US', {
+      timeZone: 'Asia/Kuala_Lumpur',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    }).replace(',', '');
+
+    await pool.query('INSERT INTO links (code, original_url, created_at) VALUES (?, ?, ?)', [code, url, createdAt || defaultTime]);
 
     const shortUrl = `${backend_url}:${port}/${code}`;
     res.json({ shortUrl, code, originalUrl: url });
@@ -56,7 +68,7 @@ app.post('/links/info', async (req: Request, res: Response): Promise<void> => {
       shortUrl: `${backend_url}:${port}/${row.code}`,
       originalUrl: row.original_url,
       clicks: row.clicks,
-      createdAt: new Date(row.created_at).toLocaleString()
+      createdAt: row.created_at
     }));
 
     res.json(formatted);
@@ -91,6 +103,36 @@ app.delete('/delete/:id', async (req: Request, res: Response): Promise<void> => 
 app.get('/', (req, res) => {
   res.send('Backend is Running!')
 })
+
+// GET /:code - Redirect
+app.get('/:code', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { code } = req.params;
+    const [rows] = await pool.query('SELECT * FROM links WHERE code = ?', [code]);
+    const links = rows as any[];
+
+    if (links.length === 0) {
+      res.status(404).send('Link not found');
+      return;
+    }
+
+    const link = links[0];
+
+    // Update clicks
+    pool.query('UPDATE links SET clicks = clicks + 1 WHERE id = ?', [link.id]);
+
+    let originalUrl = link.original_url;
+    // Check if protocol exists, if not prepend http://
+    if (!/^https?:\/\//i.test(originalUrl)) {
+      originalUrl = 'http://' + originalUrl;
+    }
+
+    res.redirect(originalUrl);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal server error');
+  }
+});
 
 app.listen(port, () => {
   console.log(`Linkly Backend listening on port ${port}`)
