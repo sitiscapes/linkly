@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Copy, Check, ExternalLink, MoreHorizontal, Trash2, Link2 } from "lucide-react"
+import { Copy, Check, ExternalLink, MoreHorizontal, Trash2, Link2, Share2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import Link from "next/link"
@@ -76,6 +76,26 @@ export function RecentLinksSection() {
     setTimeout(() => {
       fetchLinks();
     }, 1000);
+  }
+
+  const handleShare = async (url: string) => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Linkly - Shortened Link',
+          text: 'Check out this shortened link!',
+          url: url,
+        });
+      } catch (err) {
+        if ((err as Error).name !== 'AbortError') {
+          console.error("Error sharing", err);
+        }
+      }
+    } else {
+      navigator.clipboard.writeText(url);
+      setCopiedId(-1); // Special ID for general copy
+      setTimeout(() => setCopiedId(null), 2000);
+    }
   }
 
   return (
@@ -158,6 +178,13 @@ export function RecentLinksSection() {
                         Open link
                       </Link>
                     </DropdownMenuItem>
+                    <DropdownMenuItem
+                        className="gap-2 cursor-pointer"
+                        onClick={() => handleShare(link.shortUrl)}
+                      >
+                        <Share2 className="h-4 w-4" />
+                        Share link
+                      </DropdownMenuItem>
                     <DropdownMenuItem className="gap-2 text-destructive bg-accent-foreground hover:text-destructive/80! hover:bg-destructive/10! cursor-pointer">
                       <button
                         className="flex flex-row items-center gap-2"
